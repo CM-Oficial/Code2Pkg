@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+import sys, os
+
+LOGO = """
+  _____           _      ___           _             
+ / ____|         | |    |__ \         | |            
+| |     ___   __| | ___    ) |_ __  __| | __ _  ___ 
+| |    / _ \ / _` |/ _ \  / /| '_ \/ _` |/ _` |/ _ \\
+| |___| (_) | (_| |  __/ / /_| |_) \__  | (_| |  __/
+ \_____\___/ \__,_|\___||____| .__/ \__,_|\__, |\___|
+      Code2Pkg - PS3 SDK     | |           __/ |     
+                             |_|          |___/      
+                   Made by Sony Key Breakers
+
+⚠️ WARNING! ⚠️
+This project was created to assist in the creation of PKG files for the 
+PlayStation®3 system. We DO NOT SUPPORT any form of piracy of PS3® software.
+Thank you for your collaboration and enjoy! <3
+"""
+
+def help():
+    print(LOGO)
+    print("Comandos: init <nome>, build, pkg, clean")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2: help(); sys.exit()
+    cmd = sys.argv[1]
+    
+    if cmd == "init":
+        from core.project import create_project_structure
+        name = sys.argv[2] if len(sys.argv) > 2 else "Project"
+        create_project_structure(name)
+    elif cmd == "build":
+        os.system("make")
+    elif cmd == "pkg":
+        from core.metadata import generate_content_id
+        from core.packer import PS3Packer
+        # Lógica de carregamento de config e empacotamento
+        print("[*] Empacotando com chaves SKB...")
+    elif cmd == "clean":
+        os.system("rm -rf build pkg_root/USRDIR/EBOOT.BIN")
+    else: help()
