@@ -4,7 +4,7 @@ import sys
 
 def show_banner():
     # Usei o seu ASCII exato
-    print("""
+    print(r"""
  / ____|         | |    |__ \         | |    
 | |        __ _  | |__     ) |  _ __  | | __ 
 | |       / _` | | '_ \   / /  | '_ \ | |/ / 
