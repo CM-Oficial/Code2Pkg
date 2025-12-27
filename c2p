@@ -3,8 +3,7 @@ import os
 import sys
 
 def show_banner():
-    # Usei o seu ASCII exato
-    print(r"""
+    print("""
  / ____|         | |    |__ \         | |    
 | |        __ _  | |__     ) |  _ __  | | __ 
 | |       / _` | | '_ \   / /  | '_ \ | |/ / 
@@ -13,61 +12,59 @@ def show_banner():
                                | |           
                                |_|           
       Code2pkg (C2P) - SDK by MurilooPr
-    r""")
+    """)
 
 def main():
     show_banner()
     
-    # 1. LOCALIZAÇÃO
+    # 1. LOCALIZAÇÃO (Tudo no Root)
     pasta_projetos = "projects"
     
-    # 2. PERGUNTA QUAL A PASTA DO PROJETO
-    # O usuário já deve ter copiado a pasta dele para dentro de /projects
-    projeto_alvo = input("-> Qual o nome da pasta do projeto dentro de 'projects/': ").strip()
+    # 2. SELEÇÃO DO PROJETO
+    projeto_alvo = input("-> Nome da pasta do seu projeto (em projects/): ").strip()
     caminho_completo = os.path.join(pasta_projetos, projeto_alvo)
 
     if not os.path.exists(caminho_completo):
-        print(f"\n[!] Erro: A pasta '{projeto_alvo}' não foi encontrada em '{pasta_projetos}/'.")
-        print("[*] Certifique-se de que você copiou sua pasta para lá.")
+        print(f"\n[!] Erro: Pasta '{projeto_alvo}' nao encontrada em '{pasta_projetos}/'.")
         return
 
-    # 3. PERGUNTAS DO SFO (Customização)
-    print(f"\n[*] Projeto '{projeto_alvo}' selecionado.")
-    nome_ps3 = input("-> Nome do App no Menu do PS3: ").strip() or projeto_alvo
-    title_id = input("-> Title ID (Ex: SKB00001): ").strip() or "SKB00001"
+    # 3. DADOS DO SFO
+    print(f"\n[*] Configurando PKG para: {projeto_alvo}")
+    nome_ps3 = input("-> Nome no Menu do PS3: ").strip() or projeto_alvo
+    title_id = input("-> Title ID (Padrao: SKB00001): ").strip() or "SKB00001"
 
-    # 4. COMPILAÇÃO E ORGANIZAÇÃO
-    # Procurando o arquivo main.c dentro da pasta que o usuário indicou
+    # 4. COMPILAÇÃO DO MAIN.C
     arquivo_c = os.path.join(caminho_completo, "main.c")
-    
     if not os.path.exists(arquivo_c):
-        print(f"[!] Erro: Não encontrei 'main.c' em {caminho_completo}/")
+        print(f"[!] Erro: Nao encontrei 'main.c' em {caminho_completo}/")
         return
 
-    print(f"\n[*] Iniciando compilação de {arquivo_c}...")
-    
-    # Saída do ELF temporário
+    print(f"\n[*] Compilando...")
     output_elf = os.path.join(caminho_completo, "output.elf")
     
-    # Executa o Clang (ou GCC)
+    # Compila usando clang (estando no root)
     res = os.system(f"clang -Wall -O2 {arquivo_c} -o {output_elf}")
 
     if res == 0:
-        print("[✔] Compilação concluída!")
+        print("[✔] Binario ELF gerado.")
         
-        # Chama os scripts da pasta core para gerar o SFO e EBOOT
-        # Passando o caminho da pasta do projeto para eles salvarem lá dentro
-        print("[*] Gerando arquivos de sistema do PS3...")
-        os.system(f"python core/sfo_gen.py '{nome_ps3}' {title_id} {caminho_completo}")
-        os.system(f"python core/eboot_gen.py {output_elf} {caminho_completo}")
+        # 5. CHAMADA DOS SCRIPTS NO ROOT
+        # Note que não tem mais "core/" aqui
+        print("[*] Gerando arquivos do sistema...")
+        os.system(f"python sfo_gen.py '{nome_ps3}' {title_id} {caminho_completo}")
+        os.system(f"python eboot_gen.py {output_elf} {caminho_completo}")
 
-        # Remove o ELF para não ocupar espaço, deixando só o EBOOT.BIN
+        # Limpeza
         if os.path.exists(output_elf):
             os.remove(output_elf)
             
-        print(f"\n[SUCESSO] O projeto em '{caminho_completo}' está pronto para ser empacotado!")
+        # Verificação Final
+        if os.path.exists(os.path.join(caminho_completo, "EBOOT.BIN")):
+            print(f"\n[✔] SUCESSO! Tudo pronto em: {caminho_completo}")
+        else:
+            print("\n[!] Erro: Scripts de suporte falharam ao gerar arquivos.")
     else:
-        print("\n[!] Falha na compilação do código C.")
+        print("\n[!] Falha fatal na compilacao do codigo C.")
 
 if __name__ == "__main__":
     main()
