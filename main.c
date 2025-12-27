@@ -1,19 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-
-/* * Code2pkg SDK - Example Homebrew
- * Developer: MurilooPr (SKB)
- * Year: 2025
- */
 
 int main() {
-    printf("--------------------------------------------\n");
-    printf("   Code2pkg SDK: Homebrew Initialized!      \n");
-    printf("   Engine: Sony Key Breakers (SKB)          \n");
-    printf("   Developer: MurilooPr                     \n");
-    printf("--------------------------------------------\n");
-    printf("\nStatus: O binario foi compilado e assinado com sucesso.\n");
-    printf("Agora voce pode rodar este codigo no seu PS3!\n");
-
+    printf("*********************************\n");
+    printf("* Code2pkg (C2P) v1.0      *\n");
+    printf("* Powered by MurilooPr       *\n");
+    printf("* Sony Key Breakers (SKB)     *\n");
+    printf("*********************************\n");
+    printf("\nSucesso! Homebrew rodando no PS3.\n");
     return 0;
 }
