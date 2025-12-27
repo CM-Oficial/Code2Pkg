@@ -1,29 +1,73 @@
 #!/usr/bin/env python3
-import sys
 import os
+import sys
 
-# O 'r' antes das aspas resolve o SyntaxWarning da logo ASCII
-print(r"""
- / ____|         | |    |__ \         | |
-| |        __ _  | |__     ) |  _ __  | | __
-| |       / _` | | '_ \   / /  | '_ \ | |/ /
+def show_banner():
+    # Usei o seu ASCII exato
+    print("""
+ / ____|         | |    |__ \         | |    
+| |        __ _  | |__     ) |  _ __  | | __ 
+| |       / _` | | '_ \   / /  | '_ \ | |/ / 
 | |____  | (_| | | |_) | / /_  | |_) | |   < 
- \_____|  \__,_| |_.__/ |____| | .__/  |_|\_\
+ \_____|  \__,_| |_.__/ |____| | .__/  |_|\_\\
                                | |           
                                |_|           
       Code2pkg (C2P) - SDK by MurilooPr
-""")
+    r""")
 
 def main():
-    if len(sys.argv) < 2:
-        print("Uso: ./c2p build <arquivo.c>")
+    show_banner()
+    
+    # 1. LOCALIZAÇÃO
+    pasta_projetos = "projects"
+    
+    # 2. PERGUNTA QUAL A PASTA DO PROJETO
+    # O usuário já deve ter copiado a pasta dele para dentro de /projects
+    projeto_alvo = input("-> Qual o nome da pasta do projeto dentro de 'projects/': ").strip()
+    caminho_completo = os.path.join(pasta_projetos, projeto_alvo)
+
+    if not os.path.exists(caminho_completo):
+        print(f"\n[!] Erro: A pasta '{projeto_alvo}' não foi encontrada em '{pasta_projetos}/'.")
+        print("[*] Certifique-se de que você copiou sua pasta para lá.")
         return
 
-    command = sys.argv[1]
-    if command == "build":
-        source_file = sys.argv[2]
-        # Aqui ele chama o make passando o arquivo digitado
-        os.system(f"make SOURCE={source_file}")
+    # 3. PERGUNTAS DO SFO (Customização)
+    print(f"\n[*] Projeto '{projeto_alvo}' selecionado.")
+    nome_ps3 = input("-> Nome do App no Menu do PS3: ").strip() or projeto_alvo
+    title_id = input("-> Title ID (Ex: SKB00001): ").strip() or "SKB00001"
+
+    # 4. COMPILAÇÃO E ORGANIZAÇÃO
+    # Procurando o arquivo main.c dentro da pasta que o usuário indicou
+    arquivo_c = os.path.join(caminho_completo, "main.c")
+    
+    if not os.path.exists(arquivo_c):
+        print(f"[!] Erro: Não encontrei 'main.c' em {caminho_completo}/")
+        return
+
+    print(f"\n[*] Iniciando compilação de {arquivo_c}...")
+    
+    # Saída do ELF temporário
+    output_elf = os.path.join(caminho_completo, "output.elf")
+    
+    # Executa o Clang (ou GCC)
+    res = os.system(f"clang -Wall -O2 {arquivo_c} -o {output_elf}")
+
+    if res == 0:
+        print("[✔] Compilação concluída!")
+        
+        # Chama os scripts da pasta core para gerar o SFO e EBOOT
+        # Passando o caminho da pasta do projeto para eles salvarem lá dentro
+        print("[*] Gerando arquivos de sistema do PS3...")
+        os.system(f"python core/sfo_gen.py '{nome_ps3}' {title_id} {caminho_completo}")
+        os.system(f"python core/eboot_gen.py {output_elf} {caminho_completo}")
+
+        # Remove o ELF para não ocupar espaço, deixando só o EBOOT.BIN
+        if os.path.exists(output_elf):
+            os.remove(output_elf)
+            
+        print(f"\n[SUCESSO] O projeto em '{caminho_completo}' está pronto para ser empacotado!")
+    else:
+        print("\n[!] Falha na compilação do código C.")
 
 if __name__ == "__main__":
     main()
