@@ -1,12 +1,16 @@
+# Code2pkg Makefile
 CC = clang
-CFLAGS = -target powerpc-unknown-freebsd -m32 -march=pwr4 -O2
-LDFLAGS = -nostdlib
+CFLAGS = -Wall -O2
+# O nome do arquivo vem do comando que o c2p envia
+SOURCE ?= main.c
+TARGET = build/output.elf
 
-all: pkg_root/USRDIR/EBOOT.BIN
+all: $(TARGET)
 
-pkg_root/USRDIR/EBOOT.BIN: build/output.elf
-	python3 ../core/eboot_gen.py build/output.elf pkg_root/USRDIR/EBOOT.BIN
+$(TARGET): $(SOURCE)
+	@mkdir -p build
+	$(CC) $(CFLAGS) $(SOURCE) -o $(TARGET)
+	@echo "Compilado: $(TARGET)"
 
-build/output.elf: src/main.c
-	mkdir -p build
-	$(CC) $(CFLAGS) $(LDFLAGS) src/main.c -o build/output.elf
+clean:
+	rm -rf build/
